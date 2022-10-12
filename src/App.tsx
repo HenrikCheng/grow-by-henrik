@@ -1,27 +1,66 @@
 import React from "react";
 import "./App.css";
-import { HashRouter as Router, Route, Link, Routes } from "react-router-dom";
-import { Home, Foo, Bar } from "../src/Pages";
-import Login from "./Login";
+import {
+  BrowserRouter,
+  HashRouter as Router,
+  Route,
+  Link,
+  Routes,
+} from "react-router-dom";
+import { useAuth0 } from "@auth0/auth0-react";
+import Profile from "./Components/Profile";
+import SignIn from "./Components/SignIn";
+import "./App.css";
 
 function App() {
+  const { isAuthenticated, logout } = useAuth0();
+
+  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
+    null
+  );
+
+  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorElNav(event.currentTarget);
+  };
+
+  const handleCloseNavMenu = () => {
+    setAnchorElNav(null);
+  };
+
   return (
-    <Router>
-      <div>
+    <div>
+      <BrowserRouter>
         <nav>
-          <Link to="/">Home</Link>
-          <Link to="/foo">Foo</Link>
-          <Link to="/bar">Bar</Link>
-          <Link to="/Login">Login</Link>
+          {!isAuthenticated && (
+            <li onClick={handleCloseNavMenu}>
+              <Link to="/signIn">Sign In</Link>
+            </li>
+          )}
+          {isAuthenticated && (
+            <>
+              <li onClick={handleCloseNavMenu}>
+                <Link to="/profile">Profile</Link>
+              </li>
+              <li
+                onClick={() => {
+                  handleCloseNavMenu();
+                  logout({
+                    returnTo: window.location.origin + "/react-auth0",
+                  });
+                }}
+              >
+                <button>Sign Out</button>
+              </li>
+            </>
+          )}
         </nav>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/foo" element={<Foo />} />
-          <Route path="/bar" element={<Bar />} />
-          <Route path="/Login" element={<Login />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/signIn" element={<SignIn />} />
+          <Route path="*" element={<SignIn />} />
         </Routes>
-      </div>
-    </Router>
+      </BrowserRouter>
+    </div>
   );
 }
 
